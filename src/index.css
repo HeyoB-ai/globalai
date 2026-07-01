@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Global · Slot Matcher — design tokens (Tailwind CSS v4)
+   Neutrale grijs/witte basis met petrol als merk-accent.
+   ========================================================================== */
+@theme {
+  /* Merk-accent Global: helder kobalt / royalblauw (rond #0057B8) */
+  --color-brand-50: #eaf2fd;
+  --color-brand-100: #d3e4fb;
+  --color-brand-200: #a7c8f6;
+  --color-brand-300: #71a4ee;
+  --color-brand-400: #3f82e2;
+  --color-brand-500: #1f66cc;
+  --color-brand-600: #0057b8; /* primaire merk-kleur */
+  --color-brand-700: #00499b;
+  --color-brand-800: #073a78;
+  --color-brand-900: #0a3160;
+
+  /* Lettertypen: rond & vriendelijk (Poppins) voor koppen/merk,
+     neutraal leesbaar (Inter) voor body-tekst. */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Poppins', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    font-feature-settings: 'cv02', 'cv03', 'cv04';
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Tabulaire cijfers voor statistieken, aantallen en datums:
+     voorkomt horizontale sprongen bij wisselende waarden. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
