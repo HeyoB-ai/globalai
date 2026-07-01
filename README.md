@@ -6,10 +6,25 @@ newshooks. De matches worden gegenereerd door een **Claude Managed Agent** en
 weggeschreven naar Supabase; dit dashboard is de leeslaag + statusbeheer voor
 accountmanagers.
 
-> **Scope van deze versie:** alleen het dashboard (lezen + status wijzigen).
-> Het aansturen van de agent (nieuwe run starten) komt in een latere iteratie
-> via een Netlify Function. Er is bewust **geen** auth-flow ingebouwd — het
-> dashboard gaat uit van een bestaande Supabase-auth-setup.
+> **Scope van deze versie:** het dashboard (lezen + status wijzigen) achter een
+> Supabase e-mail/wachtwoord-login. Het aansturen van de agent (nieuwe run
+> starten) komt in een latere iteratie via een Netlify Function.
+
+## Inloggen & gebruikers
+
+Het dashboard staat achter een loginscherm (Supabase Auth, e-mail + wachtwoord).
+De RLS-policies geven alléén de `authenticated` rol toegang, dus zonder login
+zijn er geen matches zichtbaar.
+
+Er is bewust **geen** self-service registratie — accountmanagers worden door een
+beheerder toegevoegd:
+
+1. Supabase Dashboard → **Authentication → Users → Add user**.
+2. Vul e-mailadres + wachtwoord in en vink **Auto Confirm User** aan (anders moet
+   het account eerst per e-mail bevestigd worden).
+3. De gebruiker kan nu inloggen op de site.
+
+Uitloggen kan via de knop rechtsboven in de header.
 
 ## Stack
 
@@ -97,9 +112,8 @@ npm run dev
 Standaard op http://localhost:5173.
 
 > **Let op — RLS + auth:** de leespolicy staat alléén de `authenticated` rol
-> toe. Zonder ingelogde sessie geeft Supabase een lege/afgeschermde respons en
-> toont het dashboard een nette melding. Log in via je bestaande auth-setup, of
-> voeg tijdelijk een sessie toe om lokaal data te zien.
+> toe. Je krijgt daarom eerst het loginscherm; log in met een Supabase-gebruiker
+> (zie [Inloggen & gebruikers](#inloggen--gebruikers)) om de matches te zien.
 
 ## Overige scripts
 
@@ -147,10 +161,16 @@ supabase/
 src/
   lib/
     supabase.ts        # client (VITE_SUPABASE_URL / _ANON_KEY)
+    useAuth.ts         # Supabase-sessie (getSession + onAuthStateChange)
     matchService.ts    # fetchMatches / updateMatchStatus
     selectors.ts       # filteren, groeperen tot slots, statistieken
     constants.ts       # statuskleuren
     format.ts          # NL datum-/tijdnotatie
-  components/          # Header, StatsStrip, FilterBar, SlotCard, MatchItem, …
-  App.tsx              # states: config / laden / fout / leeg / data
+  components/
+    LoginScreen.tsx    # e-mail/wachtwoord-login
+    Dashboard.tsx      # ingelogde dashboard (data + states)
+    Header.tsx         # kobalt topbar, wordmark, uitloggen
+    Wordmark.tsx       # GLOBAL-logo placeholder (ring-met-stip "O")
+    # + StatsStrip, FilterBar, SlotCard, MatchItem, StatusBadge, …
+  App.tsx              # auth-gate: config / sessie-check / login / dashboard
 ```
