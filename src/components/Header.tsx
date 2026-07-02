@@ -1,4 +1,4 @@
-import { LogOut, RefreshCw } from 'lucide-react';
+import { LogOut, Plus, RefreshCw } from 'lucide-react';
 import Wordmark from './Wordmark';
 
 interface Props {
@@ -6,6 +6,7 @@ interface Props {
   refreshing: boolean;
   userEmail: string;
   onSignOut: () => void;
+  onNewAnalysis: () => void;
 }
 
 export default function Header({
@@ -13,6 +14,7 @@ export default function Header({
   refreshing,
   userEmail,
   onSignOut,
+  onNewAnalysis,
 }: Props) {
   return (
     <header className="bg-brand-600 text-white shadow-sm">
@@ -33,6 +35,15 @@ export default function Header({
               {userEmail}
             </span>
           )}
+
+          <button
+            type="button"
+            onClick={onNewAnalysis}
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Nieuwe analyse</span>
+          </button>
 
           <button
             type="button"

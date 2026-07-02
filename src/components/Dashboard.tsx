@@ -16,6 +16,7 @@ import FilterBar from './FilterBar';
 import SlotCard from './SlotCard';
 import EmptyState from './EmptyState';
 import Toast from './Toast';
+import NewAnalysisModal from './NewAnalysisModal';
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -34,6 +35,7 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
   const [errorMsg, setErrorMsg] = useState('');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [toast, setToast] = useState('');
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   const load = useCallback(async () => {
     setState((prev) => (prev === 'ready' ? 'ready' : 'loading'));
@@ -85,6 +87,7 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
         refreshing={state === 'loading'}
         userEmail={userEmail}
         onSignOut={onSignOut}
+        onNewAnalysis={() => setShowAnalysis(true)}
       />
 
       {/* Filterbalk alleen tonen als er iets te filteren valt. */}
@@ -176,6 +179,17 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
           </div>
         )}
       </main>
+
+      {showAnalysis && (
+        <NewAnalysisModal
+          onClose={() => setShowAnalysis(false)}
+          onCompleted={() => {
+            setShowAnalysis(false);
+            setToast('Nieuwe matches geladen');
+            void load();
+          }}
+        />
+      )}
 
       {toast && <Toast message={toast} onDismiss={() => setToast('')} />}
     </div>

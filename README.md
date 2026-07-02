@@ -126,10 +126,56 @@ npm run lint      # tsc --noEmit (type-check zonder build)
 ## Deploy naar Netlify
 
 `netlify.toml` is meegeleverd (build `npm run build`, publish `dist`, SPA
-fallback). Zet in Netlify → **Site settings → Environment variables**:
+fallback + functions-map `netlify/functions`). Zet in Netlify →
+**Site settings → Environment variables**:
+
+**Frontend (client-side, mogen publiek zijn):**
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+
+**Netlify Functions (server-side — NOOIT met `VITE_`-prefix):**
+
+- `ANTHROPIC_API_KEY` 🔒 — Anthropic API-key (alleen in de functions)
+- `ANTHROPIC_AGENT_ID` — id van de Global Sales Assistant agent (`agent_…`)
+- `ANTHROPIC_ENVIRONMENT_ID` — id van de bestaande environment (`env_…`)
+- `SUPABASE_URL` — zelfde waarde als `VITE_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY` 🔒 — service-role key (schrijft naar
+  `match_results`, omzeilt RLS)
+
+## Nieuwe analyse starten (Excel-upload)
+
+De knop **Nieuwe analyse** (rechtsboven) vervangt de handmatige Files-API +
+Console-flow:
+
+1. Kies een `.xlsx`-bestand → bevestig → **Start analyse**.
+2. De Netlify Function `start-analysis` uploadt het bestand naar de Anthropic
+   Files API, start een sessie op de bestaande agent + environment, mount het
+   bestand op `/mnt/session/uploads/<naam>` en stuurt één `user.message` om de
+   analyse te starten. De functie returnt direct de `session_id` (wacht niet
+   op de agent).
+3. Het dashboard toont "Analyse loopt" + een **Check status**-knop (geen
+   automatische polling).
+4. Elke klik roept `check-analysis-status` aan. Zodra de sessie klaar is
+   (status `idle`), leest de functie het outputbestand
+   `/mnt/session/outputs/match_results.json`, valideert het, en **upsert** de
+   rijen naar `match_results` op de sleutel `locatie + adverteerder +
+   startdatum` (bestaat → update, anders insert — geen schemawijziging nodig).
+5. Bij "voltooid" toont het dashboard hoeveel rijen zijn toegevoegd/bijgewerkt
+   en een knop **Terug naar dashboard** die de data herlaadt.
+
+**Output-contract:** het startbericht draagt de agent op om exact een
+JSON-array met de `match_results`-kolommen naar
+`/mnt/session/outputs/match_results.json` te schrijven. Wijkt de output af, dan
+toont het dashboard een nette foutmelding met het advies het resultaat
+handmatig in de Anthropic Console te checken.
+
+> **Lokaal testen:** `npm run dev` (Vite) serveert de functions niet. Gebruik
+> `netlify dev` (Netlify CLI) om frontend + functions samen te draaien, met de
+> bovenstaande env vars in een lokale `.env`.
+
+> **Alle Anthropic-calls lopen via de functions** — de `ANTHROPIC_API_KEY`
+> komt nooit in de client-bundle terecht.
 
 ## Datamodel (`match_results`)
 
@@ -158,10 +204,15 @@ gegroepeerd tot één **slot** met meerdere voorgestelde matches.
 supabase/
   migrations/001_match_results.sql   # tabel + enum + RLS-policies (authenticated)
   seed.sql                           # ~10 voorbeeldrijen
+netlify/
+  functions/
+    start-analysis.mts               # upload .xlsx -> sessie starten -> session_id
+    check-analysis-status.mts        # status opvragen -> output parsen -> upsert
 src/
   lib/
     supabase.ts        # client (VITE_SUPABASE_URL / _ANON_KEY)
     useAuth.ts         # Supabase-sessie (getSession + onAuthStateChange)
+    analysisApi.ts     # client voor de start/check Netlify Functions
     matchService.ts    # fetchMatches / updateMatchStatus
     selectors.ts       # filteren, groeperen tot slots, statistieken
     constants.ts       # statuskleuren
@@ -169,8 +220,9 @@ src/
   components/
     LoginScreen.tsx    # e-mail/wachtwoord-login
     Dashboard.tsx      # ingelogde dashboard (data + states)
-    Header.tsx         # kobalt topbar, wordmark, uitloggen
+    Header.tsx         # kobalt topbar, wordmark, nieuwe analyse, uitloggen
     Wordmark.tsx       # GLOBAL-logo placeholder (ring-met-stip "O")
+    NewAnalysisModal.tsx # upload-flow: select -> confirm -> running -> klaar
     # + StatsStrip, FilterBar, SlotCard, MatchItem, StatusBadge, …
   App.tsx              # auth-gate: config / sessie-check / login / dashboard
 ```

@@ -2,7 +2,13 @@
   command = "npm run build"
   publish = "dist"
 
-# SPA fallback: alle routes serveren index.html
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# SPA fallback: alle routes serveren index.html.
+# Let op: dit staat ná de impliciete /.netlify/functions/* routing, dus
+# functie-aanroepen worden niet door deze catch-all opgeslokt.
 [[redirects]]
   from = "/*"
   to = "/index.html"
