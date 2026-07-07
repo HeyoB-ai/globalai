@@ -52,7 +52,7 @@ export default function SlotCard({
       </header>
 
       {/* Matches */}
-      <div className="flex flex-1 flex-col gap-2.5 p-4">
+      <div className="flex flex-col gap-2.5 p-4">
         <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
           {slot.matches.length}{' '}
           {slot.matches.length === 1 ? 'voorgestelde match' : 'voorgestelde matches'}

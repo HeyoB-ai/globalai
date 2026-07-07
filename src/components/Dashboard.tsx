@@ -165,7 +165,7 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
                 Pas de filters aan of wis ze om alle slots weer te zien.
               </EmptyState>
             ) : (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {slots.map((slot) => (
                   <SlotCard
                     key={slot.key}
