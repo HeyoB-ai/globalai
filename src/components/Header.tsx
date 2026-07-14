@@ -1,4 +1,4 @@
-import { LogOut, Plus, RefreshCw } from 'lucide-react';
+import { Building2, LogOut, Plus, RefreshCw } from 'lucide-react';
 import Wordmark from './Wordmark';
 
 interface Props {
@@ -54,6 +54,15 @@ export default function Header({
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Vernieuwen</span>
           </button>
+
+          <a
+            href="/admin"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            title="Accountlijst beheren"
+          >
+            <Building2 className="h-4 w-4" />
+            <span className="hidden lg:inline">Accounts</span>
+          </a>
 
           <button
             type="button"

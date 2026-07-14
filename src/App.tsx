@@ -2,6 +2,7 @@ import { KeyRound, Loader2 } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 import { useAuth } from './lib/useAuth';
 import Dashboard from './components/Dashboard';
+import AdminScreen from './components/AdminScreen';
 import LoginScreen from './components/LoginScreen';
 import EmptyState from './components/EmptyState';
 
@@ -41,7 +42,16 @@ export default function App() {
     return <LoginScreen />;
   }
 
-  // 4. Ingelogd → dashboard.
+  // 4. Ingelogd. Eenvoudige padgebaseerde routing (geen router-dependency):
+  //    /admin → beheerscherm, verder → dashboard.
+  const isAdmin =
+    typeof window !== 'undefined' &&
+    window.location.pathname.replace(/\/+$/, '') === '/admin';
+
+  if (isAdmin) {
+    return <AdminScreen userEmail={session.user.email ?? ''} />;
+  }
+
   return (
     <Dashboard
       userEmail={session.user.email ?? ''}

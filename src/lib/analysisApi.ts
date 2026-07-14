@@ -51,6 +51,36 @@ export async function startAnalysis(file: File): Promise<StartResult> {
   return data as StartResult;
 }
 
+export interface UpdateAccountsResult {
+  file_id: string;
+  filename: string;
+}
+
+/**
+ * Uploadt een nieuwe accountlijst (.xlsx) en maakt die de actieve lijst.
+ * Gebruikt door het /admin-scherm.
+ */
+export async function updateAccounts(file: File): Promise<UpdateAccountsResult> {
+  const form = new FormData();
+  form.append('file', file);
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/update-accounts`, { method: 'POST', body: form });
+  } catch {
+    throw new Error('Geen verbinding met de server. Controleer je internet.');
+  }
+
+  const data = await safeJson(res);
+  if (!res.ok) {
+    throw new Error(data?.error || 'De accountlijst kon niet worden bijgewerkt.');
+  }
+  if (!data?.file_id) {
+    throw new Error('Onverwacht antwoord van de server bij het uploaden.');
+  }
+  return data as UpdateAccountsResult;
+}
+
 /** Vraag de status van een lopende analyse op. */
 export async function checkAnalysisStatus(
   sessionId: string,
