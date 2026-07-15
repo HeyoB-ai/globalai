@@ -81,6 +81,64 @@ export async function updateAccounts(file: File): Promise<UpdateAccountsResult> 
   return data as UpdateAccountsResult;
 }
 
+export interface ClassifyStartResult {
+  session_id: string;
+  known_before: number;
+}
+
+export interface ClassifyStatusResult {
+  status: AnalysisStatus;
+  added?: number;
+  known_after?: number;
+  total_in_list?: number | null;
+  remaining?: number | null;
+  note?: string;
+  error?: string;
+}
+
+/** Start één classificatie-batch (sectorclassificatie van de accountlijst). */
+export async function startClassification(): Promise<ClassifyStartResult> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/classify-accounts`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    });
+  } catch {
+    throw new Error('Geen verbinding met de server. Controleer je internet.');
+  }
+  const data = await safeJson(res);
+  if (!res.ok) {
+    throw new Error(data?.error || 'De classificatie kon niet worden gestart.');
+  }
+  if (!data?.session_id) {
+    throw new Error('Onverwacht antwoord van de server bij het starten.');
+  }
+  return data as ClassifyStartResult;
+}
+
+/** Vraag de status van een lopende classificatie-batch op. */
+export async function checkClassificationStatus(
+  sessionId: string,
+): Promise<ClassifyStatusResult> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/check-classification-status`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+  } catch {
+    throw new Error('Geen verbinding met de server. Controleer je internet.');
+  }
+  const data = await safeJson(res);
+  if (!data?.status) {
+    throw new Error(data?.error || 'De status kon niet worden opgehaald.');
+  }
+  return data as ClassifyStatusResult;
+}
+
 /** Vraag de status van een lopende analyse op. */
 export async function checkAnalysisStatus(
   sessionId: string,

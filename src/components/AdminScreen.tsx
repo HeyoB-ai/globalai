@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { updateAccounts } from '../lib/analysisApi';
+import ClassifyAccountsPanel from './ClassifyAccountsPanel';
 import Wordmark from './Wordmark';
 
 interface Props {
@@ -217,6 +218,8 @@ export default function AdminScreen({ userEmail }: Props) {
             )}
           </div>
         </div>
+
+        <ClassifyAccountsPanel />
 
         {userEmail && (
           <p className="mt-4 text-center text-xs text-slate-400">
