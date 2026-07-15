@@ -1,5 +1,6 @@
 import Anthropic, { toFile } from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import { setPendingAnalysisSession } from './_session.mts';
 
 /**
  * Netlify Function: start-analysis
@@ -187,6 +188,10 @@ export default async (req: Request): Promise<Response> => {
         },
       ],
     });
+
+    // Onthoud de sessie zodat het dashboard bij verversen/heropenen een
+    // inmiddels voltooide maar nog niet verwerkte analyse kan oppikken.
+    await setPendingAnalysisSession(session.id);
 
     return json({ session_id: session.id, filename: name });
   } catch (err) {

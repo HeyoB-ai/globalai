@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Bot, Loader2, SearchX } from 'lucide-react';
 import type { MatchResult, MatchStatus } from '../types';
-import { fetchMatches, updateMatchStatus } from '../lib/matchService';
+import {
+  fetchMatches,
+  getPendingAnalysisSessionId,
+  updateMatchStatus,
+} from '../lib/matchService';
+import { checkAnalysisStatus } from '../lib/analysisApi';
 import {
   applyFilters,
   computeStats,
@@ -58,6 +63,39 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  /**
+   * Recovery: bij het laden/verversen kijken of er een eerder gestarte analyse
+   * is die inmiddels klaar is maar nog niet verwerkt (bijv. omdat het venster
+   * gesloten of de pagina ververst werd). Zo ja: alsnog verwerken en herladen.
+   * De sessie wordt server-side (check-analysis-status) gewist bij voltooiing.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const sessionId = await getPendingAnalysisSessionId();
+        if (!sessionId || cancelled) return;
+        const res = await checkAnalysisStatus(sessionId);
+        if (cancelled) return;
+        if (res.status === 'completed') {
+          setToast(
+            `Vorige analyse alsnog verwerkt: ${res.inserted ?? 0} nieuw, ${
+              res.updated ?? 0
+            } bijgewerkt.`,
+          );
+          await load();
+        }
+        // 'running' → laat de onthouden sessie staan voor een volgende poging.
+        // 'failed'  → server heeft 'm (indien terminaal) al gewist.
+      } catch {
+        /* stil: recovery mag het dashboard nooit blokkeren */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [load]);
 
   // Afgeleide data.

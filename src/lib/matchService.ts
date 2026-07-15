@@ -19,6 +19,23 @@ export async function fetchMatches(): Promise<MatchResult[]> {
   return (data ?? []) as MatchResult[];
 }
 
+/**
+ * Leest de onthouden, mogelijk nog niet verwerkte analyse-sessie uit
+ * app_settings (gezet door start-analysis, gewist door check-analysis-status).
+ * Geeft null als er geen openstaande sessie is.
+ */
+export async function getPendingAnalysisSessionId(): Promise<string | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'pending_analysis_session_id')
+    .maybeSingle();
+  if (error) return null;
+  const value = (data as { value?: string } | null)?.value;
+  return value && value.length > 0 ? value : null;
+}
+
 /** Status van één match bijwerken in Supabase. */
 export async function updateMatchStatus(
   id: string,
