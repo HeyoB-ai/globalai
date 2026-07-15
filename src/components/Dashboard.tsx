@@ -36,8 +36,13 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [toast, setToast] = useState('');
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
+    // `refreshing` staat los van de state-machine: bij een handmatige refresh
+    // vanuit 'ready' blijft de data zichtbaar (geen volledig laadscherm), maar
+    // moet de Vernieuwen-knop wél spinnen/disablen zodat de klik voelbaar is.
+    setRefreshing(true);
     setState((prev) => (prev === 'ready' ? 'ready' : 'loading'));
     try {
       const data = await fetchMatches();
@@ -46,6 +51,8 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Onbekende fout');
       setState('error');
+    } finally {
+      setRefreshing(false);
     }
   }, []);
 
@@ -84,7 +91,7 @@ export default function Dashboard({ userEmail, onSignOut }: Props) {
     <div className="min-h-dvh bg-slate-50">
       <Header
         onRefresh={load}
-        refreshing={state === 'loading'}
+        refreshing={refreshing}
         userEmail={userEmail}
         onSignOut={onSignOut}
         onNewAnalysis={() => setShowAnalysis(true)}

@@ -39,7 +39,7 @@ export default function Header({
           <button
             type="button"
             onClick={onNewAnalysis}
-            className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Nieuwe analyse</span>
@@ -49,7 +49,7 @@ export default function Header({
             type="button"
             onClick={onRefresh}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 disabled:opacity-60"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Vernieuwen</span>
@@ -67,7 +67,7 @@ export default function Header({
           <button
             type="button"
             onClick={onSignOut}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20"
           >
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Uitloggen</span>
